@@ -44,20 +44,19 @@ resource "google_storage_bucket_iam_member" "tfstate_admin" {
   member = "principalSet://iam.googleapis.com/${google_iam_workload_identity_pool.pool.name}/attribute.repository/${var.github_repo}"
 }
 
-resource "google_project_iam_member" "wif_workload_identity_admin" {
-  project = var.project_id
-  role    = "roles/iam.workloadIdentityPoolAdmin"
-  member  = "principalSet://iam.googleapis.com/${google_iam_workload_identity_pool.pool.name}/attribute.repository/${var.github_repo}"
-}
-
-resource "google_project_iam_member" "wif_service_usage_admin" {
-  project = var.project_id
-  role    = "roles/serviceusage.serviceUsageAdmin"
-  member  = "principalSet://iam.googleapis.com/${google_iam_workload_identity_pool.pool.name}/attribute.repository/${var.github_repo}"
-}
-
-resource "google_project_iam_member" "wif_project_iam_admin" {
-  project = var.project_id
-  role    = "roles/resourcemanager.projectIamAdmin"
-  member  = "principalSet://iam.googleapis.com/${google_iam_workload_identity_pool.pool.name}/attribute.repository/${var.github_repo}"
-}
+# Project-level IAM bindings for the WIF principal are not managed by Terraform.
+# Attempts to manage them via google_project_iam_member consistently failed with
+# googleapi: Error 400: Precondition check failed., failedPrecondition — the exact
+# cause is unclear (possible timing issue with newly created WIF pool, org policy,
+# or a GCP restriction on federated identities calling setIamPolicy for principalSet://
+# members). The same bindings applied successfully via gcloud as the project owner.
+#
+# These must be granted manually by the project owner (dylanrigal@gmail.com)
+# as a one-time bootstrap step for each environment:
+#
+#   PROJECT_NUMBER=$(gcloud projects describe <project-id> --format='value(projectNumber)')
+#   WIF_PRINCIPAL="principalSet://iam.googleapis.com/projects/${PROJECT_NUMBER}/locations/global/workloadIdentityPools/kellika-<env>-pool/attribute.repository/dylanrigal1999/kellika"
+#
+#   gcloud projects add-iam-policy-binding <project-id> --member="${WIF_PRINCIPAL}" --role="roles/iam.workloadIdentityPoolAdmin"
+#   gcloud projects add-iam-policy-binding <project-id> --member="${WIF_PRINCIPAL}" --role="roles/serviceusage.serviceUsageAdmin"
+#   gcloud projects add-iam-policy-binding <project-id> --member="${WIF_PRINCIPAL}" --role="roles/resourcemanager.projectIamAdmin"
