@@ -16,6 +16,10 @@ on:
       - '.github/workflows/terraform.yml'
       - '.github/workflows/terraform-env.yml'
 
+permissions:
+  contents: read
+  id-token: write
+
 jobs:
   dev:
     uses: ./.github/workflows/terraform-env.yml
