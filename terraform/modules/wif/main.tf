@@ -1,3 +1,15 @@
+resource "google_project_service" "required_apis" {
+  for_each = toset([
+    "iam.googleapis.com",
+    "iamcredentials.googleapis.com",
+    "sts.googleapis.com",
+  ])
+
+  project            = var.project_id
+  service            = each.value
+  disable_on_destroy = false
+}
+
 resource "google_iam_workload_identity_pool" "pool" {
   project                   = var.project_id
   workload_identity_pool_id = "kellika-${var.env}-pool"
