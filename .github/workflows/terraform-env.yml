@@ -1,20 +1,20 @@
-name: Terraform Dev
+name: Terraform Environment
 
 on:
-  push:
-    branches:
-      - main
-    paths:
-      - 'terraform/environments/dev/**'
-      - 'terraform/modules/**'
-      - '.github/workflows/terraform-dev.yml'
-  pull_request:
-    branches:
-      - main
-    paths:
-      - 'terraform/environments/dev/**'
-      - 'terraform/modules/**'
-      - '.github/workflows/terraform-dev.yml'
+  workflow_call:
+    inputs:
+      environment:
+        required: true
+        type: string
+      project_id:
+        required: true
+        type: string
+      wif_provider:
+        required: true
+        type: string
+      apply:
+        required: true
+        type: boolean
 
 permissions:
   contents: read
@@ -26,8 +26,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: terraform/environments/dev
-
+        working-directory: terraform/environments/${{ inputs.environment }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -35,8 +34,8 @@ jobs:
       - name: Authenticate to GCP
         uses: google-github-actions/auth@v2
         with:
-          project_id: 'kellika-dev'
-          workload_identity_provider: ${{ vars.WIF_PROVIDER_DEV }}
+          project_id: ${{ inputs.project_id }}
+          workload_identity_provider: ${{ inputs.wif_provider }}
 
       - name: Set up Terraform
         uses: hashicorp/setup-terraform@v3
@@ -56,19 +55,18 @@ jobs:
       - name: Upload Plan
         uses: actions/upload-artifact@v4
         with:
-          name: tfplan-dev
-          path: terraform/environments/dev/tfplan
+          name: tfplan-${{ inputs.environment }}
+          path: terraform/environments/${{ inputs.environment }}/tfplan
 
   apply:
     name: Apply
     needs: plan
-    if: github.event_name == 'push'
-    environment: dev
+    if: inputs.apply
+    environment: ${{ inputs.environment }}
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: terraform/environments/dev
-
+        working-directory: terraform/environments/${{ inputs.environment }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -76,8 +74,8 @@ jobs:
       - name: Authenticate to GCP
         uses: google-github-actions/auth@v2
         with:
-          project_id: 'kellika-dev'
-          workload_identity_provider: ${{ vars.WIF_PROVIDER_DEV }}
+          project_id: ${{ inputs.project_id }}
+          workload_identity_provider: ${{ inputs.wif_provider }}
 
       - name: Set up Terraform
         uses: hashicorp/setup-terraform@v3
@@ -88,8 +86,8 @@ jobs:
       - name: Download Plan
         uses: actions/download-artifact@v4
         with:
-          name: tfplan-dev
-          path: terraform/environments/dev
+          name: tfplan-${{ inputs.environment }}
+          path: terraform/environments/${{ inputs.environment }}
 
       - name: Terraform Apply
         run: terraform apply tfplan

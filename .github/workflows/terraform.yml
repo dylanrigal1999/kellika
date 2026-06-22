@@ -1,0 +1,38 @@
+name: Terraform
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'terraform/**'
+      - '.github/workflows/terraform.yml'
+      - '.github/workflows/terraform-env.yml'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'terraform/**'
+      - '.github/workflows/terraform.yml'
+      - '.github/workflows/terraform-env.yml'
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  dev:
+    uses: ./.github/workflows/terraform-env.yml
+    with:
+      environment: dev
+      project_id: kellika-dev
+      wif_provider: ${{ vars.WIF_PROVIDER_DEV }}
+      apply: ${{ github.event_name == 'push' }}
+
+  prod:
+    uses: ./.github/workflows/terraform-env.yml
+    with:
+      environment: prod
+      project_id: kellika-prod
+      wif_provider: ${{ vars.WIF_PROVIDER_PROD }}
+      apply: ${{ github.event_name == 'push' }}
