@@ -21,4 +21,6 @@ module "wif" {
   env            = var.env
   github_repo    = var.github_repo
   tfstate_bucket = var.tfstate_bucket
+
+  depends_on = [google_project_service.apis]
 }
