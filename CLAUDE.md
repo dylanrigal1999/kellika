@@ -49,6 +49,33 @@ Before committing any Terraform change:
 
 `terraform apply` runs automatically via GitHub Actions on merge to `main` (prod) or `dev` branch. If you need to apply manually for any reason, stop and ask the user first.
 
+## Firestore Schema
+
+**`users/{user_id}`**
+```
+display_name:  string
+email:         string
+fcm_token:     string
+group_id:      string
+created_at:    timestamp
+```
+
+**`groups/{group_id}`**
+```
+user_ids:      [uid1, uid2, ...]
+created_at:    timestamp
+```
+
+**`tasks/{task_id}`**
+```
+title:         string
+owner_id:      string
+group_id:      string
+completed:     bool
+completed_at:  timestamp | null
+created_at:    timestamp
+```
+
 ## Naming Conventions
 
 - GCP resources: `kellika-{env}-{resource}` e.g. `kellika-dev-api`
