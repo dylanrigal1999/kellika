@@ -23,3 +23,9 @@ variable "tfstate_bucket" {
   description = "GCS bucket name for Terraform state"
   type        = string
 }
+
+variable "docker_image" {
+  description = "Docker image URL for the API Cloud Run service"
+  type        = string
+  default     = "us-docker.pkg.dev/cloudrun/container/hello:latest"
+}

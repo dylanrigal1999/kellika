@@ -81,3 +81,4 @@ created_at:    timestamp
 - GCP resources: `kellika-{env}-{resource}` e.g. `kellika-dev-api`
 - GCS state bucket: `kellika-{env}-tfstate`
 - Terraform modules: snake_case
+- Terraform resource names: snake_case, descriptive of what the resource is e.g. `kellika_gar_repository` not `main` or `api`

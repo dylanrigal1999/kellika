@@ -17,3 +17,9 @@ variable "tfstate_bucket" {
   description = "Name of the GCS bucket used for Terraform state"
   type        = string
 }
+
+variable "tf_workflow_name" {
+  description = "Name of the Terraform GitHub Actions workflow (must match the workflow's name: field)"
+  type        = string
+  default     = "Terraform"
+}

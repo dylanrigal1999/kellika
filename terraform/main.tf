@@ -14,6 +14,10 @@ provider "google" {
   region  = var.region
 }
 
+locals {
+  deploy_principal_set = "principalSet://iam.googleapis.com/${module.wif.pool_name}/attribute.workflow/Deploy"
+}
+
 module "wif" {
   source = "./modules/wif"
 
