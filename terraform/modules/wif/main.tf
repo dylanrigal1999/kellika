@@ -1,16 +1,3 @@
-resource "google_project_service" "required_apis" {
-  for_each = toset([
-    "cloudresourcemanager.googleapis.com",
-    "iam.googleapis.com",
-    "iamcredentials.googleapis.com",
-    "sts.googleapis.com",
-  ])
-
-  project            = var.project_id
-  service            = each.value
-  disable_on_destroy = false
-}
-
 resource "google_iam_workload_identity_pool" "pool" {
   project                   = var.project_id
   workload_identity_pool_id = "kellika-${var.env}-pool"
@@ -71,5 +58,6 @@ resource "google_project_iam_member" "wif_project_iam_admin" {
 # As a one-time bootstrap step for each environment, the project owner (dylanrigal@gmail.com)
 # must apply these locally using personal credentials:
 #
-#   cd terraform/environments/<env>
-#   terraform apply
+#   cd terraform
+#   terraform init -backend-config="bucket=kellika-<env>-tfstate" -backend-config="prefix=terraform/state"
+#   terraform apply -var-file=environments/<env>.tfvars
