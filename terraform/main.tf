@@ -7,11 +7,6 @@ terraform {
       version = "~> 6.0"
     }
   }
-
-  backend "gcs" {
-    bucket = "kellika-dev-tfstate"
-    prefix = "terraform/state"
-  }
 }
 
 provider "google" {
@@ -20,10 +15,10 @@ provider "google" {
 }
 
 module "wif" {
-  source = "../../modules/wif"
+  source = "./modules/wif"
 
   project_id     = var.project_id
-  env            = "dev"
+  env            = var.env
   github_repo    = var.github_repo
-  tfstate_bucket = "kellika-dev-tfstate"
+  tfstate_bucket = var.tfstate_bucket
 }

@@ -26,7 +26,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: terraform/environments/${{ inputs.environment }}
+        working-directory: terraform
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -41,7 +41,10 @@ jobs:
         uses: hashicorp/setup-terraform@v3
 
       - name: Terraform Init
-        run: terraform init
+        run: |
+          terraform init \
+            -backend-config="bucket=kellika-${{ inputs.environment }}-tfstate" \
+            -backend-config="prefix=terraform/state"
 
       - name: Terraform Format Check
         run: terraform fmt -check -recursive
@@ -50,13 +53,13 @@ jobs:
         run: terraform validate
 
       - name: Terraform Plan
-        run: terraform plan -out=tfplan -no-color
+        run: terraform plan -var-file=environments/${{ inputs.environment }}.tfvars -out=tfplan -no-color
 
       - name: Upload Plan
         uses: actions/upload-artifact@v4
         with:
           name: tfplan-${{ inputs.environment }}
-          path: terraform/environments/${{ inputs.environment }}/tfplan
+          path: terraform/tfplan
 
   apply:
     name: Apply
@@ -66,7 +69,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: terraform/environments/${{ inputs.environment }}
+        working-directory: terraform
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -81,13 +84,16 @@ jobs:
         uses: hashicorp/setup-terraform@v3
 
       - name: Terraform Init
-        run: terraform init
+        run: |
+          terraform init \
+            -backend-config="bucket=kellika-${{ inputs.environment }}-tfstate" \
+            -backend-config="prefix=terraform/state"
 
       - name: Download Plan
         uses: actions/download-artifact@v4
         with:
           name: tfplan-${{ inputs.environment }}
-          path: terraform/environments/${{ inputs.environment }}
+          path: terraform
 
       - name: Terraform Apply
         run: terraform apply tfplan
